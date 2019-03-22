@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8" />
+		<title>Document</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="css/mui.css" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title" id="title">xxx的详情</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-row" style="text-align: center;margin-top: 10px;">
+				<img src="avatar/nanshen.jpg" style="border-radius: 50%; width: 200px;height: 200px;" />
+			</div>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						玩具名称:<span id="toy_name"></span>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						主人名称:<span id="baby_name"></span>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						设备编号:<span id="device_key"></span>
+					</a>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#">设备二维码</a>
+					<div class="mui-collapse-content" style="text-align: center;">
+						<img id="device_qr" src="avatar/baba.jpg" style="width: 150px;height: 150px;" />
+					</div>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-collapse">
+					<a class="mui-navigate-right" href="#">玩具通讯录</a>
+					<div class="mui-collapse-content">
+						<ul class="mui-table-view mui-grid-view" id="friend_list">
+							<li class="mui-table-view-cell mui-media mui-col-xs-3">
+								<a href="#" id="scan">
+									<img class="mui-media-object" src="image/add.jpg" style="border-radius: 50%;width: 50px;height: 50px;">
+									<div class="mui-media-body">添加好友</div>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
+			</ul>
+
+		</div>
+		<script src="js/mui.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			var Sdata = null;
+			mui.plusReady(function() {
+				Sdata = plus.webview.currentWebview();
+				console.log(JSON.stringify(Sdata));
+				document.getElementById("baby_name").innerText = Sdata.baby_name;
+				document.getElementById("toy_name").innerText = Sdata.toy_name;
+				document.getElementById("title").innerText = Sdata.toy_name + "的详情";
+				document.getElementById("device_key").innerText = Sdata.device_key;
+				document.getElementById("device_qr").src = window.serv_qr + Sdata.device_key + ".jpg";
+
+				for(var i = 0; i < Sdata.friend_list.length; i++) {
+
+					create_friend(Sdata.friend_list[i]);
+				}
+
+			});
+
+			function create_friend(friend) {
+				var litag = document.createElement("li");
+				litag.className = "mui-table-view-cell mui-media mui-col-xs-3";
+				var atag = document.createElement("a");
+				atag.onclick = function() {};
+				var imgtag = document.createElement("img");
+				imgtag.className = "mui-media-object";
+				imgtag.style.cssText = "border-radius: 50%;width: 50px;height: 50px;";
+				imgtag.src = "avatar/" + friend.friend_avatar;
+				var divtag = document.createElement("div");
+				divtag.className = "mui-media-body";
+				divtag.innerText = friend.friend_remark;
+
+				litag.appendChild(atag);
+				atag.appendChild(imgtag);
+				atag.appendChild(divtag);
+
+				document.getElementById("friend_list").appendChild(litag);
+			}
+
+			document.getElementById('scan').addEventListener('tap', function() {
+				mui.openWindow({
+					url: "scanqr.html",
+					id: "scanqr.html",
+					extras: {
+						type: "toy",
+						req_user_id:Sdata._id
+					}
+				})
+			})
+		</script>
+	</body>
+
+</html>

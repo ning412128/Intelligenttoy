@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="css/mui.css"/>
+</head>
+<body>
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+        <h1 class="mui-title" id="title">xxxx正在播放</h1>
+    </header>
+    <div class="mui-content">
+        <div class="mui-row" style="text-align: center;margin-top: 15px;">
+            <img src="" id="cover" style="width: 300px;height: 300px; border-radius: 50%; "/>
+        </div>
+        <button type="button" class="mui-btn mui-btn-yellow mui-btn-block" id="pause">暂停</button>
+        <button type="button" class="mui-btn mui-btn-green mui-btn-block" id="resume">继续</button>
+        <button type="button" class="mui-btn mui-btn-blue mui-btn-block" id="send2toy">发送给玩具</button>
+        <style type="text/css">
+        #popover{
+        	height: 200px;
+        	width:300px;
+        }
+        </style>
+        <div id="popover" class="mui-popover">
+        	<div class="mui-scroll-wrapper">
+        	    <div class="mui-scroll">
+        		    <ul class="mui-table-view" style="text-align: center;" id="my_toy">
+        		    	
+        		    </ul>
+        		</div>
+        	</div>
+        </div>
+        <a href="#popover" id="openPopover" class="mui-btn mui-btn-primary mui-btn-block">打开弹出菜单</a>
+        
+    </div>
+    <script src="js/mui.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+    mui.init()
+    mui('.mui-scroll-wrapper').scroll()
+    var Sdata = null;
+    var player = null;
+    var ws = null;
+    mui.plusReady(function(){
+    	Sdata = plus.webview.currentWebview();
+    	document.getElementById("title").innerText = Sdata.title;
+    	document.getElementById("cover").src=window.serv_image + Sdata.cover;
+    	player = plus.audio.createPlayer(window.serv_music + Sdata.music);
+    	// player == AudioPlayer
+    	player.play(function(){
+    		mui.toast("音乐播放完成");
+    	})
+    	ws = new WebSocket(window.ws_serv+"myapp");
+    	
+    	mui.post(window.serv + '/toy_list',{
+    			_id:window.localStorage.getItem("user_id")
+    		},function(data){
+    			for (var i = 0; i < data.data.length; i++) {
+    				create_my_toy(data.data[i])
+    			}
+    		},'json'
+    	);
+    	
+    	
+    })
+    
+    function create_my_toy(toy){    	
+    	var li = document.createElement("li");
+    	li.className = "mui-table-view-cell";
+    	var a = document.createElement("a");
+    	a.innerText = toy.toy_name;
+    	a.onclick = function(){
+    		var send_str = {to_user:toy._id,music:Sdata.music}
+			ws.send(JSON.stringify(send_str));
+    	}
+    	li.appendChild(a);
+    	document.getElementById("my_toy").appendChild(li);
+    	
+    }
+    
+    
+    document.getElementById('pause').addEventListener('tap',function () {
+        player.pause();
+    });
+    
+    document.getElementById('resume').addEventListener('tap',function () {
+        player.resume();
+    });
+    
+    document.getElementById('send2toy').addEventListener('tap',function () {
+//  	player = plus.audio.createPlayer("http://192.168.15.88:9527/get_music/" + Sdata.music);
+//      player.play();
+		
+		
+    })
+        
+    </script>
+</body>
+</html>
